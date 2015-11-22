@@ -1,37 +1,32 @@
-# Load ggplot2 library
-library(ggplot2)
-
 NEI <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/summarySCC_PM25.rds")
-SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
+ SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
 
-NEI$year <- factor(NEI$year, levels=c('1999', '2002', '2005', '2008'))
-
-# Baltimore City, Maryland
-# Los Angeles County, California
-MD.onroad <- subset(NEI, fips == '24510' & type == 'ON-ROAD')
-CA.onroad <- subset(NEI, fips == '06037' & type == 'ON-ROAD')
-
-# Aggregate
-MD.DF <- aggregate(MD.onroad[, 'Emissions'], by=list(MD.onroad$year), sum)
-colnames(MD.DF) <- c('year', 'Emissions')
-MD.DF$City <- paste(rep('MD', 4))
-
-CA.DF <- aggregate(CA.onroad[, 'Emissions'], by=list(CA.onroad$year), sum)
-colnames(CA.DF) <- c('year', 'Emissions')
-CA.DF$City <- paste(rep('CA', 4))
-
-DF <- as.data.frame(rbind(MD.DF, CA.DF))
-
-# Compare emissions from motor vehicle sources in Baltimore City with emissions from motor vehicle sources 
-# in Los Angeles County, California (fips == 06037). Which city has seen greater changes over time 
-# in motor vehicle emissions?
-
-# Generate the graph in the same directory as the source code
-png('D:/Dane/10231133/Documents/COURSERA/assigment2/plot6.png')
-
-ggplot(data=DF, aes(x=year, y=Emissions)) + geom_bar(aes(fill=year)) + guides(fill=F) + 
-    ggtitle('Total Emissions of Motor Vehicle Sources\nLos Angeles County, California vs. Baltimore City, Maryland') + 
-    ylab(expression('PM'[2.5])) + xlab('Year') + theme(legend.position='none') + facet_grid(. ~ City) + 
-    geom_text(aes(label=round(Emissions,0), size=1, hjust=0.5, vjust=-1))
-
-dev.off()
+> # Gather the subset of the NEI data which corresponds to vehicles
+> vehicles <- grepl("vehicle", SCC$SCC.Level.Two, ignore.case=TRUE)
+> vehiclesSCC <- SCC[vehicles,]$SCC
+> vehiclesNEI <- NEI[NEI$SCC %in% vehiclesSCC,]
+> 
+> # Subset the vehicles NEI data by each city's fip and add city name.
+> vehiclesBaltimoreNEI <- vehiclesNEI[vehiclesNEI$fips=="24510",]
+> vehiclesBaltimoreNEI$city <- "Baltimore City"
+> 
+> vehiclesLANEI <- vehiclesNEI[vehiclesNEI$fips=="06037",]
+> vehiclesLANEI$city <- "Los Angeles County"
+> 
+> # Combine the two subsets with city name into one data frame
+> bothNEI <- rbind(vehiclesBaltimoreNEI,vehiclesLANEI)
+> 
+> png("plot6.png",width=480,height=480,units="px",bg="transparent")
+> 
+> library(ggplot2)
+> 
+> ggp <- ggplot(bothNEI, aes(x=factor(year), y=Emissions, fill=city)) +
++     geom_bar(aes(fill=year),stat="identity") +
++     facet_grid(scales="free", space="free", .~city) +
++     guides(fill=FALSE) + theme_bw() +
++     labs(x="year", y=expression("Total PM"[2.5]*" Emission (Kilo-Tons)")) + 
++     labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore & LA, 1999-2008"))
+> 
+> print(ggp)
+> 
+> dev.off()
