@@ -5,23 +5,24 @@ library(ggplot2)
 NEI <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/summarySCC_PM25.rds")
 SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
 
-NEI$year <- factor(NEI$year, levels=c('1999', '2002', '2005', '2008'))
+# Gather the subset of the NEI data which corresponds to vehicles
+vehicles <- grepl("vehicle", SCC$SCC.Level.Two, ignore.case=TRUE)
+vehiclesSCC <- SCC[vehicles,]$SCC
+vehiclesNEI <- NEI[NEI$SCC %in% vehiclesSCC,]
 
-# Baltimore City, Maryland == fips
-MD.onroad <- subset(NEI, fips == 24510 & type == 'ON-ROAD')
+# Subset the vehicles NEI data to Baltimore's fip
+baltimoreVehiclesNEI <- vehiclesNEI[vehiclesNEI$fips=="24510",]
 
-# Aggregate
-MD.df <- aggregate(MD.onroad[, 'Emissions'], by=list(MD.onroad$year), sum)
-colnames(MD.df) <- c('year', 'Emissions')
+png("plot5.png",width=480,height=480,units="px",bg="transparent")
 
-# How have emissions from motor vehicle sources changed from 1999-2008 in Baltimore City? 
+library(ggplot2)
 
-# Generate the graph in the same directory as the source code
-png('D:/Dane/10231133/Documents/COURSERA/assigment2/plot5.png')
+ggp <- ggplot(baltimoreVehiclesNEI,aes(factor(year),Emissions)) +
+    geom_bar(stat="identity",fill="grey",width=0.75) +
+    theme_bw() +  guides(fill=FALSE) +
+    labs(x="year", y=expression("Total PM"[2.5]*" Emission (10^5 Tons)")) + 
+    labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore from 1999-2008"))
 
-ggplot(data=MD.df, aes(x=year, y=Emissions)) + geom_bar(aes(fill=year)) + guides(fill=F) + 
-    ggtitle('Total Emissions of Motor Vehicle Sources in Baltimore City, Maryland') + 
-    ylab(expression('PM'[2.5])) + xlab('Year') + theme(legend.position='none') + 
-    geom_text(aes(label=round(Emissions,0), size=1, hjust=0.5, vjust=2))
+print(ggp)
 
 dev.off()
