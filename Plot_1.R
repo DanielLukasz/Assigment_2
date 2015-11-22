@@ -1,23 +1,17 @@
-# Loading provided datasets - loading from local machine
-> NEI <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/summarySCC_PM25.rds")
-> SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
-> 
-> # Sampling
-> NEI_sampling <- NEI[sample(nrow(NEI), size=2000, replace=F), ]
-> 
-> # Aggregate
-> Emissions <- aggregate(NEI[, 'Emissions'], by=list(NEI$year), FUN=sum)
-> Emissions$PM <- round(Emissions[,2]/1000,2)
-> 
-> # Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? 
-> # Using the base plotting system, make a plot showing the total PM2.5 emission from all sources 
-> # for each of the years 1999, 2002, 2005, and 2008.
-> 
-> # Generate the graph in the same directory as the source code
-> png(filename='D:/Dane/10231133/Documents/COURSERA/assigment2/plot1.png')
-> 
-> barplot(Emissions$PM, names.arg=Emissions$Group.1, 
-+         main=expression('Total Emission of PM'[2.5]),
-+         xlab='Year', ylab=expression(paste('PM', ''[2.5], ' in Kilotons')))
-> 
-> dev.off()
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+
+# Aggregate by sum the total emissions by year
+aggTotals <- aggregate(Emissions ~ year,NEI, sum)
+
+png("plot1.png",width=480,height=480,units="px",bg="transparent")
+
+barplot(
+  (aggTotals$Emissions)/10^6,
+  names.arg=aggTotals$year,
+  xlab="Year",
+  ylab="PM2.5 Emissions (10^6 Tons)",
+  main="Total PM2.5 Emissions From All US Sources"
+)
+
+dev.off()
