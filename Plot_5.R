@@ -1,9 +1,6 @@
-# Load ggplot2 library
-library(ggplot2)
-
-# Loading provided datasets - loading from local machine
-NEI <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/summarySCC_PM25.rds")
-SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
+# Load the NEI & SCC data frames.
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
 
 # Gather the subset of the NEI data which corresponds to vehicles
 vehicles <- grepl("vehicle", SCC$SCC.Level.Two, ignore.case=TRUE)
@@ -18,10 +15,10 @@ png("plot5.png",width=480,height=480,units="px",bg="transparent")
 library(ggplot2)
 
 ggp <- ggplot(baltimoreVehiclesNEI,aes(factor(year),Emissions)) +
-    geom_bar(stat="identity",fill="grey",width=0.75) +
-    theme_bw() +  guides(fill=FALSE) +
-    labs(x="year", y=expression("Total PM"[2.5]*" Emission (10^5 Tons)")) + 
-    labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore from 1999-2008"))
+  geom_bar(stat="identity",fill="grey",width=0.75) +
+  theme_bw() +  guides(fill=FALSE) +
+  labs(x="year", y=expression("Total PM"[2.5]*" Emission (10^5 Tons)")) + 
+  labs(title=expression("PM"[2.5]*" Motor Vehicle Source Emissions in Baltimore from 1999-2008"))
 
 print(ggp)
 
