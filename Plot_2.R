@@ -1,20 +1,21 @@
-NEI <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/summarySCC_PM25.rds")
-> SCC <- readRDS("D:/Dane/10231133/Documents/COURSERA/assigment2/Source_Classification_Code.rds")
-> 
-> # Sampling
-> NEI_sampling <- NEI[sample(nrow(NEI), size=5000, replace=F), ]
-> 
-> # Subset data and append two years in one data frame
-> MD <- subset(NEI, fips=='24510')
-> 
-> # Have total emissions from PM2.5 decreased in the Baltimore City, Maryland (fips == "24510") 
-> # from 1999 to 2008? Use the base plotting system to make a plot answering this question.
-> 
-> # Generate the graph in the same directory as the source code
-> png(filename='D:/Dane/10231133/Documents/COURSERA/assigment2/plot2.png')
-> 
-> barplot(tapply(X=MD$Emissions, INDEX=MD$year, FUN=sum), 
-+         main='Total Emission in Baltimore City, MD', 
-+         xlab='Year', ylab=expression('PM'[2.5]))
-> 
-> dev.off()
+# Load the NEI & SCC data frames.
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+
+# Subset NEI data by Baltimore's fip.
+baltimoreNEI <- NEI[NEI$fips=="24510",]
+
+# Aggregate using sum the Baltimore emissions data by year
+aggTotalsBaltimore <- aggregate(Emissions ~ year, baltimoreNEI,sum)
+
+png("plot2.png",width=480,height=480,units="px",bg="transparent")
+
+barplot(
+  aggTotalsBaltimore$Emissions,
+  names.arg=aggTotalsBaltimore$year,
+  xlab="Year",
+  ylab="PM2.5 Emissions (Tons)",
+  main="Total PM2.5 Emissions From all Baltimore City Sources"
+)
+
+dev.off()
